@@ -2,6 +2,7 @@
 
 "use client";
 import { useState } from "react";
+import axios from "axios";
 
 export default function Page() {
   const [noCount, setNoCount] = useState(0);
@@ -10,6 +11,32 @@ export default function Page() {
 
   const handleNoClick = () => {
     setNoCount(noCount + 1);
+    sendTelegramMessage("No");
+  };
+
+  const handleYesClick = () => {
+    setYesPressed(true);
+    sendTelegramMessage("Yes");
+  };
+
+  const sendTelegramMessage = (response) => {
+    console.log(process.env, process.env.TELEGRAM_API, process.env.CHAT_ID);
+
+    const message = response === "Yes" ? "Yes: Ok yay!!!" : `No: ${getNoButtonText()}`;
+    
+    const params = new URLSearchParams({
+      chat_id: process.env.CHAT_ID,
+      text: message,
+      parse_mode: "html"
+    });
+    
+    axios.post(`https://api.telegram.org/bot${process.env.TELEGRAM_API}/sendMessage?${params}`)
+      .then((response) => {
+        console.log("Telegram API response:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error sending message to Telegram:", error);
+      });
   };
 
   const getNoButtonText = () => {
@@ -30,7 +57,7 @@ export default function Page() {
       "Wouldn't you reconsider?",
       "Is that your final answer?",
       "You're breaking my heart ;(",
-      "Rawr!!!"
+      "Rawr!!! :((("
     ];
 
     return phrases[Math.min(noCount, phrases.length - 1)];
@@ -40,24 +67,24 @@ export default function Page() {
     <div className="flex flex-col items-center justify-center h-screen -mt-16">
       {yesPressed ? (
         <>
-        <img src="https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-kisses.gif" />
-        <div className="text-4xl font-bold my-4">Ok yay!!!</div>
+          <img src="https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-kisses.gif" alt="Bear kisses" />
+          <div className="text-4xl font-bold my-4">Ok yay!!!</div>
         </>
       ) : (
         <>
-          <img className="h-[200px]" src="https://gifdb.com/images/high/cute-love-bear-roses-ou7zho5oosxnpo6k.gif" />
-          <h1 className="text-4xl my-4">Will you be my Valentine?</h1>
+          <img className="h-[200px]" src="https://gifdb.com/images/high/cute-love-bear-roses-ou7zho5oosxnpo6k.gif" alt="Cute love bear" />
+          <h1 className="text-2xl my-4">Will you be my Valentine?</h1>
           <div>
             <button
               className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-4`}
               style={{ fontSize: yesButtonSize }}
-              onClick={() => setYesPressed(true)}
+              onClick={handleYesClick}
             >
               Yes
             </button>
             <button
               onClick={handleNoClick}
-              className=" bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
             >
               {noCount === 0 ? "No" : getNoButtonText()}
             </button>

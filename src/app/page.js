@@ -20,17 +20,18 @@ export default function Page() {
   };
 
   const sendTelegramMessage = (response) => {
-    console.log(process.env, process.env.TELEGRAM_API, process.env.CHAT_ID);
+    // console.log(process.env.NODE_ENV, process.env.NEXT_PUBLIC_TELEGRAM_API, process.env.NEXT_PUBLIC_CHAT_ID);
+    // console.log(process.env);
 
     const message = response === "Yes" ? "Yes: Ok yay!!!" : `No: ${getNoButtonText()}`;
     
     const params = new URLSearchParams({
-      chat_id: process.env.CHAT_ID,
+      chat_id: process.env.NEXT_PUBLIC_CHAT_ID,
       text: message,
       parse_mode: "html"
     });
     
-    axios.post(`https://api.telegram.org/bot${process.env.TELEGRAM_API}/sendMessage?${params}`)
+    axios.post(`https://api.telegram.org/bot${process.env.NEXT_PUBLIC_TELEGRAM_API}/sendMessage?${params}`)
       .then((response) => {
         console.log("Telegram API response:", response.data);
       })

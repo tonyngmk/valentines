@@ -1,18 +1,27 @@
 
 
 "use client";
-import { useState } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import axios from "axios";
 
 export default function Page() {
   const [noCount, setNoCount] = useState(0);
   const [yesPressed, setYesPressed] = useState(false);
-  const yesButtonSize = noCount * 20 + 16;
+  const [noButtonStyle, setNoButtonStyle] = useState({});
+  const yesButtonRef = useRef(null);
 
   const handleNoClick = () => {
     setNoCount(noCount + 1);
     sendTelegramMessage("No");
   };
+
+  const moveButton = useCallback(() => {
+    const containerWidth = 300;
+    const containerHeight = 200;
+    const newLeft = Math.random() * containerWidth;
+    const newTop = Math.random() * containerHeight;
+    setNoButtonStyle({ position: 'absolute', top: `${newTop}px`, left: `${newLeft}px` });
+  }, []);
 
   const handleYesClick = () => {
     setYesPressed(true);
@@ -20,9 +29,6 @@ export default function Page() {
   };
 
   const sendTelegramMessage = (response) => {
-    // console.log(process.env.NODE_ENV, process.env.NEXT_PUBLIC_TELEGRAM_API, process.env.NEXT_PUBLIC_CHAT_ID);
-    // console.log(process.env);
-
     const message = response === "Yes" ? "Yes: Ok yay!!!" : `No: ${getNoButtonText()}`;
     
     const params = new URLSearchParams({
@@ -75,20 +81,27 @@ export default function Page() {
         <>
           <img className="h-[200px]" src="https://gifdb.com/images/high/cute-love-bear-roses-ou7zho5oosxnpo6k.gif" alt="Cute love bear" />
           <h1 className="text-2xl my-4">Will you be my Valentine?</h1>
-          <div>
-            <button
-              className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-4`}
-              style={{ fontSize: yesButtonSize }}
-              onClick={handleYesClick}
-            >
-              Yes
-            </button>
-            <button
-              onClick={handleNoClick}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-            >
-              {noCount === 0 ? "No" : getNoButtonText()}
-            </button>
+          <div className="relative w-full">
+            <div className="flex justify-center gap-4 relative">
+              <button
+                ref={yesButtonRef}
+                className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-all duration-200 ease-in-out`}
+                style={{ transform: `scale(${1 + noCount * 0.5})` }}
+                onClick={handleYesClick}
+              >
+                Yes
+              </button>
+              <button
+                className={`bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-all duration-200 ease-in-out`}
+                onClick={() => {
+                  handleNoClick();
+                  moveButton();
+                }}
+                style={noButtonStyle}
+              >
+                {getNoButtonText()}
+              </button>
+            </div>
           </div>
         </>
       )}
